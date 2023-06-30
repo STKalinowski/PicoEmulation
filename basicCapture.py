@@ -81,18 +81,13 @@ def record():
             now = datetime.datetime.now()
             recordDate = now.strftime("%y%m%d%H%S")
             vid = cv2.VideoWriter(f'./Videos/{recordDate}.mp4', fourcc, float(fps), imgReshape)
-
             for frame in recordFrame:
                 img = cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR)
                 img = cv2.resize(img, imgReshape)
                 vid.write(img)
-            
-            df.loc[len(df)] = [recordDate, recordKey, game]
-
+            # Write our control recording to our databases
+            connection.execute("INSERT INTO recordings VALUE (?, ?, ?, ?)", [int(recordDate), recordKey,recordDate+'.mp4', game])
             time.sleep(2)
-
-    df.to_csv(f'./HoldRes/{recordDate}.csv', index=False)
-
 
 with keyboard.Listener(on_press=on_press, on_release=on_release) as listener:
     record()
