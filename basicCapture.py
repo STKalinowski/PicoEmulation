@@ -45,21 +45,21 @@ def record():
     global key_set
     # Define the screen size and region to capture
     screen_size = {"top":105, "left":1262, "width":128, "height":128}
-    #r = (0, 0, screen_size[0], screen_size[1])
     imgReshape = (128,128)
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 
-    df = pd.DataFrame(columns=['id', 'keys', 'game'])
-    count = 0
+    #df = pd.DataFrame(columns=['id', 'keys', 'game'])
     totalTime = 3 # Total Time in seconds
     fps = 15 # Rate of frame capture in frames per second
     numOfLoops = totalTime * fps
     sleepTime = 1 / fps
     runs = 100
+
     with mss.mss() as sct:
         for i in range(runs):
             recordFrame = []
             recordKey = []
+            # One Recording, where we get a list of inputs and frames
             for count in range(numOfLoops):
                 # Capture a frame from the screen
                 with lock:
@@ -74,7 +74,7 @@ def record():
                 timeToWake = time.perf_counter() + sleepTime
                 while time.perf_counter() < timeToWake:
                     time.sleep(0) 
-
+            # Now we take our inputs add them to the DB and save our video 
             now = datetime.datetime.now()
             recordDate = now.strftime("%y%m%d%H%S")
             vid = cv2.VideoWriter(f'./HoldRes/{recordDate}.mp4', fourcc, float(fps), imgReshape)
@@ -83,6 +83,7 @@ def record():
                 img = cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR)
                 img = cv2.resize(img, imgReshape)
                 vid.write(img)
+            
             df.loc[len(df)] = [recordDate, recordKey, game]
 
             time.sleep(2)
