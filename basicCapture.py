@@ -18,11 +18,9 @@ def update_one_hot_set(key, value):
     with lock:
         # If the pressed/released key is one of the keys we're interested in, update the one hot set
         if key in key_index_map:
-            if value:
-                key_set.add(key_index_map[key])
-                window_pressed.add(key_index_map[key])
-            else:
-                key_set.discard(key_index_map[key])
+            key_set = key_set ^ key_index_map[key]
+            if not(key_index_map[key] & window_pressed):
+                window_pressed = key_index_map[key] ^ window_pressed
 
 def on_press(key):
     try:
