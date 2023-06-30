@@ -127,3 +127,15 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+/Test
+/Train
+/Val
+/Interactive/gameEmulator.pt
+/*.zip
+/Test.zip
+/Train.zip
+/Val.zip
+
+/Videos
+/recordings.db
