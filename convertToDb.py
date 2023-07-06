@@ -39,7 +39,7 @@ def process_csv_file(file_path, connection):
             insert_row(connection, row)
 
 def main():
-    file_path = "./HoldRes/2305180056.csv"
+    file_path = "./Video/2305180056.csv"
     connection = duckdb.connect(database="recordings.db")
 
     create_table(connection)
