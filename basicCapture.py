@@ -15,14 +15,20 @@ lock = threading.Lock()
 
 def on_press(key):
     with lock:
-        if key in key_index_map:
-            key_set = key_set ^ key_index_map[key]
-            window_pressed = window_pressed ^ key_index_map[key]
+        global key_set
+        global window_pressed
+        if str(key) in key_index_map:
+            key_set = key_set ^ key_index_map[str(key)]
+            window_pressed = window_pressed ^ key_index_map[str(key)]
+
 
 def on_release(key):
     with lock:
-        if key in key_index_map:
-            key_set = key_set & ~key_index_map[key]
+        global key_set
+        global window_pressed
+        if str(key) in key_index_map:
+            key_set = key_set & ~key_index_map[str(key)]
+
 
 # Record frames & get Keys
 def record():
@@ -32,14 +38,16 @@ def record():
     connection = duckdb.connect(database='recordings.db')
 
     # Recording variables
-    totalTime = 3 # Total Time in seconds
+    totalTime = 1 # Total Time in seconds
     fps = 15 # Rate of frame capture in frames per second
     numOfLoops = totalTime * fps
     sleepTime = 1 / fps
-    runs = 100
+    runs = 5
 
     # Define the screen size and region to capture
-    screen_size = {"top":105, "left":1262, "width":128, "height":128}
+    top=108
+    left = 1207
+    screen_size = {"top":top, "left":left, "width":128, "height":128}
     imgReshape = (128,128)
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 
@@ -47,13 +55,12 @@ def record():
         for i in range(runs):
             recordFrame = []
             recordKey = []
+            numOfLoops = totalTime * fps 
             # One Recording, where we get a list of inputs and frames
             while (numOfLoops > 0):
                 numOfLoops -= 1
                 # Capture a frame from the screen
                 with lock:
-                    print(window_pressed)
-
                     sct_img = np.array(sct.grab(screen_size))
                     recordFrame.append(sct_img)
                     recordKey.append(window_pressed)
@@ -72,7 +79,7 @@ def record():
                 img = cv2.resize(img, imgReshape)
                 vid.write(img)
             # Write our control recording to our databases
-            connection.execute("INSERT INTO recordings VALUE (?, ?, ?, ?)", [int(recordDate), recordKey,recordDate+'.mp4', game])
+            connection.execute("INSERT INTO recordings VALUES (?, ?, ?, ?)", [int(recordDate), recordKey,recordDate+'.mp4', game])
             time.sleep(2)
 
 with keyboard.Listener(on_press=on_press, on_release=on_release) as listener:

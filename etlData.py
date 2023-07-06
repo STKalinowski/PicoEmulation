@@ -43,24 +43,26 @@ def createEntries(row):
     video.release()
 
     # Create X & Y data
-    x_data, y_data = [], []
+    x_fdata, x_cdata, y_data = [], [], []
     for i in range(len(frames_encoded) - 1):
         # For x data, we take the encoded frame and the one hot encoding of the input at the same index
-        x = (frames_encoded[i], createOneHot(row[1][i]).numpy())
+        x_frame = frames_encoded[i]
+        x_control = createOneHot(row[1][i]).numpy()
         # For y data, we take the next encoded frame
         y = frames_encoded[i + 1]
         
-        x_data.append(x)
-        y_data.append(y)
+        x_fdata.append(x_frame.flatten())
+        x_cdata.append(x_control.flatten())
+        y_data.append(y.flatten())
     
     # Convert the data to a DataFrame
-    retDataframe = pd.DataFrame(list(zip(x_data, y_data)), columns=['x', 'y'])
+    retDataframe = pd.DataFrame(list(zip(x_fdata,x_cdata, y_data)), columns=['x_frame', 'x_control', 'y'])
     
     return retDataframe
 
 def main():
     # Our starting parquets
-    splitDfs = [pd.DataFrame(columns=['x', 'y']),pd.DataFrame(columns=['x', 'y']), pd.DataFrame(columns=['x', 'y'])]
+    splitDfs = [pd.DataFrame(columns=['x_frame', 'x_control', 'y']),pd.DataFrame(columns=['x_frame', 'x_control', 'y']), pd.DataFrame(columns=['x_frame', 'x_control', 'y'])]
 
     connection = duckdb.connect(database='recordings.db')
     result = connection.execute("SELECT * FROM recordings;")
